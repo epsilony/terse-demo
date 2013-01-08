@@ -25,6 +25,47 @@ def triple_spline(dist, diff_order):
             res[1] = -4 + 8 * dist - 4 * dist ** 2
     return res
 
+class Wendland(object):
+    _coefs_1 = (-1, 1)
+    _coefs_1_orders = (4, 6, 8)
+    _coefs_2s = [(4, 1),
+            (35, 18, 3),
+            (32, 25, 8, 1)]
+    _c_ops = (2, 4, 6)
+    
+    def __init__(self, c=4):
+        c_ops = self._c_ops
+        if not c in c_ops:
+            raise ValueError("c should be one of " + str(c_ops))
+        index = c / 2
+        p_1 = (1,)
+        for _i in xrange(self._coefs_1_orders[index]):
+            p_1 = np.polymul(p_1, self._coefs_1)
+        p_2 = self._coefs_2s[index]
+        p = np.polymul(p_1, p_2)
+        self.poly = np.poly1d(p)
+        self.set_diff_order(0)
+    
+    def set_diff_order(self, order):
+        self.diff_order = order
+        self.polys = [self.poly]
+        p = self.poly
+        for _i in xrange(order):
+            p = np.polyder(p)
+            self.polys.append(p)
+    
+    def values(self, r):
+        if r >= 1:
+            return np.zeros((self.diff_order + 1,))
+        
+        res = np.ndarray((self.diff_order + 1,), dtype=np.double)
+        for i in xrange(self.diff_order + 1):
+            res[i] = self.polys[i](r)
+        return res
+    
+    __call__ = values
+    
+
 class WeightFunction(object):
     def __init__(self, core_func=None):
         if core_func is None:
@@ -73,4 +114,16 @@ if __name__ == '__main__':
         
     for y in ys:
         ax.plot(x, y)
+    fig.show()
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    x = np.linspace(0, 1.5)
+    wend = Wendland()
+    wend.set_diff_order(2)
+    ys = np.ndarray((len(x), wend.diff_order + 1))
+    for i in xrange(len(x)):
+        ys[i] = wend(x[i])
+    for i in xrange(wend.diff_order + 1):
+        ax.plot(x, ys[:, i])
     fig.show()
