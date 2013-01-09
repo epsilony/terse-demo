@@ -16,14 +16,14 @@ def sample_coords():
     coords = [(x, y) for x in v for y in v]
     return coords
 
-def polygon_xy(xy):
+def polynomial_sample(xy):
     x, y = xy
     val = 1.1 + 3 * x + 4.4 * y - x ** 2 - 1.3 * x * y + 2.2 * y ** 2
     val_x = 3 - 2 * x - 1.3 * y
     val_y = 4.4 - 1.3 * x + 4.4 * y
     return (val, val_x, val_y)
     
-def sin_cos_xy(xy):
+def sin_cos_sample(xy):
     cycle = 40
     par = 2 * pi / cycle
     x, y = xy
@@ -75,7 +75,7 @@ def partition_of_unity_test():
         ok_(acts[1] < 1e-9)
 
 def function_fitness_test():
-    func_errors = [(polygon_xy, 1e-10), (sin_cos_xy, 2e-5)]
+    func_errors = [(polynomial_sample, 1e-10), (sin_cos_sample, 2e-5)]
     
     mls = MLS()
     mls.set_diff_order(1)
