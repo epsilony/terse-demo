@@ -84,22 +84,26 @@ class WeightFunction(object):
     diff_order = property(get_diff_order, set_diff_order)
     
     def values(self, dists, infl_rads):
-        num_row = output_length_2d(self.diff_order)
-        results = np.ndarray(dists.shape, dtype=np.double)
+        num_col = output_length_2d(self.diff_order)
+        results = np.ndarray((len(dists),num_col), dtype=np.double)
         if len(infl_rads) == 1:
             uni_rad = infl_rads[0]
         else:
             uni_rad = None
-            
-        for i in xrange(results.shape[0]):
+        
+        i=0
+        if not uni_rad:
+            rad_iter=iter(infl_rads)
+        for dist in dists:
             if uni_rad:
                 rad = uni_rad
             else:
-                rad = infl_rads[i]
-            core_value = self.core_func(dists[i][0] / rad, self._diff_order)
+                rad = next(rad_iter)
+            core_value = self.core_func(dist[0] / rad, self._diff_order)
             results[i][0] = core_value[0]
-            for j in xrange(1, num_row):
-                results[i][j] = core_value[1] / rad * dists[i][j]
+            for j in xrange(1, num_col):
+                results[i][j] = core_value[1] / rad * dist[j]
+            i+=1
         return results
 
 if __name__ == '__main__':
