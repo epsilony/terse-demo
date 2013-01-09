@@ -37,7 +37,7 @@ class Wendland(object):
         c_ops = self._c_ops
         if not c in c_ops:
             raise ValueError("c should be one of " + str(c_ops))
-        index = c / 2
+        index = c / 2 - 1
         p_1 = (1,)
         for _i in xrange(self._coefs_1_orders[index]):
             p_1 = np.polymul(p_1, self._coefs_1)
