@@ -9,7 +9,7 @@ import numpy as np
 def bases_length(nm_order):
     return (nm_order + 1) * (nm_order + 2) / 2
 
-def monomial_bases(xy, base_order, diff_order):
+def monomial_basis(xy, base_order, diff_order):
     if diff_order < 0 or diff_order > 1:
         raise ValueError("Only supports diff_order = 0 or 1")
     if base_order< 0:
@@ -46,7 +46,7 @@ def monomial_bases(xy, base_order, diff_order):
                 res[2, i2 + n + 1] = res[0, i1 + n] * (n + 1)
     return res
 
-class MonomialBases(object):
+class MonomialBasis(object):
     def __init__(self, base_order=2):
         self.base_order = base_order
         self.diff_order = 0
@@ -55,11 +55,11 @@ class MonomialBases(object):
         return bases_length(self.base_order)
     
     def values(self, xy):
-        return monomial_bases(xy, self.base_order, self.diff_order)
+        return monomial_basis(xy, self.base_order, self.diff_order)
     
     def set_diff_order(self, diff_order):
         self.diff_order = diff_order
     
 if __name__ == '__main__':
-    print monomial_bases((1, 2), 4, 1)
+    print monomial_basis((1, 2), 4, 1)
     

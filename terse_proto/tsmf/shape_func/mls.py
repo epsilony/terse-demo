@@ -6,7 +6,7 @@ Created on 2012-12-31
 import numpy as np
 from terse_proto.tsmf.util.part_diff_math import output_length_2d
 from terse_proto.tsmf.shape_func.radial_funcs import RadialFunction
-from terse_proto.tsmf.shape_func.bases_func import MonomialBases
+from terse_proto.tsmf.shape_func.monomial_basis import MonomialBasis
 
 def _dists(center, coords, diff_order):
     num_col = output_length_2d(diff_order)
@@ -30,12 +30,12 @@ class MLS(object):
     def set_diff_order(self, order):
         if order > 1:
             raise ValueError("Only supports 0 or 1 differential order")
-        # self.bases_func.set_diff_order(order) #nonsense about mls
+        # self.monomial_basis.set_diff_order(order) #nonsense about mls
         self.weight_func.set_diff_order(order)
         self._diff_order = order
         self.mat_As = []
-        base_dim = self.bases_func.size()
-        self._t_mat=np.ndarray((base_dim,base_dim),dtype=np.double)
+        base_dim = self.basis.size()
+        self._t_mat = np.ndarray((base_dim, base_dim), dtype=np.double)
         for _i in xrange(output_length_2d(order)):
             self.mat_As.append(np.ndarray((base_dim, base_dim), dtype=np.double))   
     
@@ -44,7 +44,7 @@ class MLS(object):
     
     diff_order = property(_get_diff_order, set_diff_order)
     
-    def __init__(self, weight_func=None, bases_func=None):
+    def __init__(self, weight_func=None, basis=None):
         '''
         Constructor
         '''
@@ -52,25 +52,25 @@ class MLS(object):
             self.weight_func = RadialFunction()
         else:
             self.weight_func = weight_func
-        if None is bases_func:
-            self.bases_func = MonomialBases()
+        if None is basis:
+            self.basis = MonomialBasis()
         else:
-            self.bases_func = bases_func
+            self.basis = basis
         self.set_diff_order(0)
         
     def _zero_mat_As(self):   
         for mat_A in self.mat_As:
             mat_A.fill(0)
     
-    def _gen_mat_Bs(self,coords_lens):
+    def _gen_mat_Bs(self, coords_lens):
         mat_Bs = []
         for _i in xrange(output_length_2d(self.diff_order)):
-            mat_Bs.append(np.zeros((coords_lens, self.bases_func.size())))
+            mat_Bs.append(np.zeros((coords_lens, self.basis.size())))
         return mat_Bs
         
     
     def values(self, center, coords, influence_rads, dists=None):
-        center=np.array(center,dtype=np.double)
+        center = np.array(center, dtype=np.double)
         
         if None is dists:
             dists = _dists(center, coords, self.diff_order)   
@@ -84,12 +84,12 @@ class MLS(object):
         
         num_col = output_length_2d(self.diff_order)
         
-        mat_Bs=self._gen_mat_Bs(len(coords))
+        mat_Bs = self._gen_mat_Bs(len(coords))
         
-        self.bases_func.set_diff_order(0)
+        self.basis.set_diff_order(0)
         for i in xrange(len(coords)):
             nd_crd = coords[i]
-            p = self.bases_func.values(nd_crd - center)
+            p = self.basis.values(nd_crd - center)
             
             for diff_index in xrange(num_col):
                 w = weights[i][diff_index]
@@ -104,10 +104,10 @@ class MLS(object):
                 t_mat *= w
                 mat_A += t_mat
         
-        self.bases_func.set_diff_order(self.diff_order)
+        self.basis.set_diff_order(self.diff_order)
         if self.diff_order > 0:
-            self.bases_func.set_diff_order(self.diff_order)
-        p = self.bases_func.values((0.0,0.0))
+            self.basis.set_diff_order(self.diff_order)
+        p = self.basis.values((0.0, 0.0))
         g = np.linalg.solve(mat_As[0], p[0])
         
         results = np.ndarray((len(coords), num_col), dtype=np.double)
