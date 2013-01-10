@@ -8,7 +8,7 @@ import numpy as np
 
 def triple_spline(dist, diff_order):
     if diff_order > 1 or diff_order < 0:
-        raise ValueError('Only support 0 or 1 diff_order')
+        raise ValueError('Only support 0 or 1 _diff_order')
     res = np.ndarray((diff_order + 1,))
     if dist >= 1:
         res.fill(0)
@@ -44,22 +44,27 @@ class Wendland(object):
         p_2 = self._coefs_2s[index]
         p = np.polymul(p_1, p_2)
         self.poly = np.poly1d(p)
+        self._diff_order = -1
         self.set_diff_order(0)
     
     def set_diff_order(self, order):
-        self.diff_order = order
+        if self._diff_order == order:
+            return
+        self._diff_order = order
         self.polys = [self.poly]
         p = self.poly
         for _i in xrange(order):
             p = np.polyder(p)
             self.polys.append(p)
     
-    def values(self, r):
+    def values(self, r, diff_order=None):
+        if None is not diff_order:
+            self.set_diff_order(diff_order)
         if r >= 1:
-            return np.zeros((self.diff_order + 1,))
+            return np.zeros((self._diff_order + 1,), dtype=np.double)
         
-        res = np.ndarray((self.diff_order + 1,), dtype=np.double)
-        for i in xrange(self.diff_order + 1):
+        res = np.ndarray((self._diff_order + 1,), dtype=np.double)
+        for i in xrange(self._diff_order + 1):
             res[i] = self.polys[i](r)
         return res
     
@@ -85,25 +90,25 @@ class WeightFunction(object):
     
     def values(self, dists, infl_rads):
         num_col = output_length_2d(self.diff_order)
-        results = np.ndarray((len(dists),num_col), dtype=np.double)
+        results = np.ndarray((len(dists), num_col), dtype=np.double)
         if len(infl_rads) == 1:
             uni_rad = infl_rads[0]
         else:
             uni_rad = None
         
-        i=0
+        i = 0
         if not uni_rad:
-            rad_iter=iter(infl_rads)
+            rad_iter = iter(infl_rads)
         for dist in dists:
             if uni_rad:
                 rad = uni_rad
             else:
                 rad = next(rad_iter)
-            core_value = self.core_func(dist[0] / rad, self._diff_order)
+            core_value = self.core_func(dist[0] / rad, self.diff_order)
             results[i][0] = core_value[0]
             for j in xrange(1, num_col):
                 results[i][j] = core_value[1] / rad * dist[j]
-            i+=1
+            i += 1
         return results
 
 if __name__ == '__main__':
@@ -124,10 +129,10 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111)
     x = np.linspace(0, 1.5)
     wend = Wendland()
-    wend.set_diff_order(2)
-    ys = np.ndarray((len(x), wend.diff_order + 1))
+    wend.set_diff_order(1)
+    ys = np.ndarray((len(x), wend._diff_order + 1))
     for i in xrange(len(x)):
         ys[i] = wend(x[i])
-    for i in xrange(wend.diff_order + 1):
+    for i in xrange(wend._diff_order + 1):
         ax.plot(x, ys[:, i])
     fig.show()
