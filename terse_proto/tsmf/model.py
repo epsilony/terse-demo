@@ -2,9 +2,29 @@
 Created on 2012-12-22
 
 @author: Man YUAN <epsilonyuan@gmail.com>
+
+@author: Sparrow HU <huhao200709@163.com>
 '''
 
 import numpy as np
+
+class Node(object):
+    def __init__(self, array=None):
+        if None is not array:
+            self.coord = np.array(array, dtype=np.double)
+        else:
+            self.coord = None
+        self.id = 0
+        
+            
+class Segment2D(object):
+    def __init__(self, point=None):
+        self.head = Node(point)
+        self.pred = None
+        self.succ = None
+    def r(self):
+        return self.succ.head
+    rear = property(r)
 
 class Polygon2D(object):
     def __init__(self, vertex_xys):
