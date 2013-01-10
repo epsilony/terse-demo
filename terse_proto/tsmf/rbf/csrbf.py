@@ -6,7 +6,7 @@ Created on 2013-1-8
 
 import numpy as np
 from terse_proto.tsmf.shape_func import Wendland
-from terse_proto.tsmf.shape_func import WeightFunction
+from terse_proto.tsmf.shape_func import RadialFunction
 from collections import deque
 import scipy.sparse as spm
 import scipy.sparse.linalg as spm_alg
@@ -17,7 +17,7 @@ class CSRbf(object):
     
     def __init__(self, xys, xys_vals, rads, base=Wendland(4)):
         self.xys = xys
-        self.base = WeightFunction(base)
+        self.base = RadialFunction(base)
         self.rads = rads
         base_vals = deque()
         iq = deque()

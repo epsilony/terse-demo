@@ -25,6 +25,18 @@ def triple_spline(dist, diff_order):
             res[1] = -4 + 8 * dist - 4 * dist ** 2
     return res
 
+class TriangleSpline(object):
+    def __init__(self):
+        self.diff_order = 0
+    
+    def set_diff_order(self, diff_order):
+        self.diff_order = diff_order
+    
+    def values(self, dist):
+        return triple_spline(dist, self.diff_order)
+    
+    __call__ = values
+
 class Wendland(object):
     _coefs_1 = (-1, 1)
     _coefs_1_orders = (4, 6, 8)
@@ -57,9 +69,7 @@ class Wendland(object):
             p = np.polyder(p)
             self.polys.append(p)
     
-    def values(self, r, diff_order=None):
-        if None is not diff_order:
-            self.set_diff_order(diff_order)
+    def values(self, r):
         if r >= 1:
             return np.zeros((self._diff_order + 1,), dtype=np.double)
         
@@ -71,10 +81,10 @@ class Wendland(object):
     __call__ = values
     
 
-class WeightFunction(object):
+class RadialFunction(object):
     def __init__(self, core_func=None):
         if core_func is None:
-            self.core_func = triple_spline
+            self.core_func = TriangleSpline()
         else:
             self.core_func = core_func
         self.set_diff_order(0)
@@ -82,6 +92,7 @@ class WeightFunction(object):
     
     def set_diff_order(self, diff_order):
         self._diff_order = diff_order
+        self.core_func.set_diff_order(diff_order)
         
     def get_diff_order(self):
         return self._diff_order
@@ -104,7 +115,7 @@ class WeightFunction(object):
                 rad = uni_rad
             else:
                 rad = next(rad_iter)
-            core_value = self.core_func(dist[0] / rad, self.diff_order)
+            core_value = self.core_func(dist[0] / rad)
             results[i][0] = core_value[0]
             for j in xrange(1, num_col):
                 results[i][j] = core_value[1] / rad * dist[j]

@@ -5,7 +5,7 @@ Created on 2012-12-31
 '''
 import numpy as np
 from terse_proto.tsmf.util.part_diff_math import output_length_2d
-from terse_proto.tsmf.shape_func.weight_funcs import WeightFunction
+from terse_proto.tsmf.shape_func.radial_funcs import RadialFunction
 from terse_proto.tsmf.shape_func.bases_func import MonomialBases
 
 def _dists(center, coords, diff_order):
@@ -49,7 +49,7 @@ class MLS(object):
         Constructor
         '''
         if None is weight_func:
-            self.weight_func = WeightFunction()
+            self.weight_func = RadialFunction()
         else:
             self.weight_func = weight_func
         if None is bases_func:
