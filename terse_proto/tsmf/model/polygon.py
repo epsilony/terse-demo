@@ -11,31 +11,20 @@ import numpy as np
             
 class _Polygon2DIterator(object):
     def __init__(self, pg):
-        self.pg = pg
-        self.index = 0
-        self.result = self.pg.chains_heads[self.index]
-        self.just_raise = False
+        self.chains_heads_it=iter(pg.chains_heads)
+        self.next_item=None
+        self.current_chain_head=None
     
     def next(self):
-        # if self.index < len(self.pg.vertes):
-        if self.just_raise:
-            raise StopIteration()
-        re = self.result.succ
-            # result = self.pg.chains_heads[self.index]
-        if re is not self.pg.chains_heads[self.index]:
-            self.result = self.result.succ
-            return self.result.pred
-                      
+        if self.current_chain_head is None:
+            self.current_chain_head=self.chains_heads_it.next()
+            result=self.current_chain_head
         else:
-            self.index += 1
-                # return re.pred
-                
-            if self.index == len(self.pg.vertes):
-                self.just_raise = True
-                return re.pred
-            else:
-                self.result = self.pg.chains_heads[self.index]
-                return re.pred
+            result=self.next_item
+        self.next_item=result.succ
+        if self.next_item is self.current_chain_head:
+            self.current_chain_head=None
+        return result
  
 class Polygon2D(object):
     def __init__(self, vertes):
