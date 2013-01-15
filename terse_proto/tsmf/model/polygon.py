@@ -100,15 +100,16 @@ class Polygon2D(object):
         
    
 def sample_vertes_xys():
-    return np.array([[[0, 0], [1, 0], [1, 1], [0.5, 0.5], [0, 1]]], dtype=np.double)  
+    return np.array([[[-1,-1],[1,-1],[1,1],[-1,1]],
+                     [[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5]]], dtype=np.double)  
 
 if __name__ == '__main__':
 
     pg = Polygon2D(sample_vertes_xys())
     dist_func_py = np.frompyfunc(lambda x, y:pg.distance_function((x, y)), 2, 1)
     
-    xs = np.linspace(-0.5, 1.5, 100)
-    ys = np.linspace(-0.5, 1.5, 100)    
+    xs = np.linspace(-1.2, 1.2, 100)
+    ys = np.linspace(-1.2, 1.2, 100)
     (g_xs, g_ys) = np.meshgrid(xs, ys)
     
     g_zs_py = dist_func_py(g_xs, g_ys)
