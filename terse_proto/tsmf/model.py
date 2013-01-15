@@ -25,29 +25,79 @@ class Segment2D(object):
     def r(self):
         return self.succ.head
     rear = property(r)
-
+    
+    def distance_to(self, xy):
+        v1 = self.head.coord
+        v2 = self.rear.coord
+        v_e = v2 - v1
+        len_e = np.dot(v_e, v_e) ** 0.5
+        v_xy = xy - v1
+        nv_e = v_e / len_e
+        dt = np.dot(nv_e, v_xy)
+        if dt >= len_e:
+            return np.dot(dt, dt) ** 0.5
+        elif dt <= 0:
+            return np.dot(v_xy, v_xy) ** 0.5
+        else:
+            return abs(np.cross(v_e, v_xy))
+            
+class Polygon2DIterator(object):
+    def __init__(self, pg):
+        self.pg = pg
+        self.index = 0
+        self.result = self.pg.chains_heads[self.index]
+        self.just_raise = False
+    
+    def next(self):
+        # if self.index < len(self.pg.vertes):
+        if self.just_raise:
+            raise StopIteration()
+        re = self.result.succ
+            # result = self.pg.chains_heads[self.index]
+        if re is not self.pg.chains_heads[self.index]:
+            self.result = self.result.succ
+            return self.result.pred
+                      
+        else:
+            self.index += 1
+                # return re.pred
+                
+            if self.index == len(self.pg.vertes):
+                self.just_raise = True
+                return re.pred
+            else:
+                self.result = self.pg.chains_heads[self.index]
+                return re.pred
+ 
 class Polygon2D(object):
-    def __init__(self, vertex_xys):
-        self.vertex_xys = np.array(vertex_xys, dtype=np.double)
-        if len(self.vertex_xys.shape) < 2 or self.vertex_xys.shape[1] < 2 or self.vertex_xys.shape[0] < 3:
-            raise ValueError("vertex_xys must have a shape which is bigger than (3,2)")
+    def __init__(self, vertes):
+        self.vertes = vertes
+        self.chains_heads = [Segment2D(e[0]) for e in vertes ]
+        for i in xrange(len(vertes)):
+            
+            point = self.chains_heads[i]
+            for p in vertes[i][1:]:
+                point.succ = Segment2D(p)
+                t = point
+                point = point.succ
+                point.pred = t
+            point.succ = self.chains_heads[i]
+            self.chains_heads[i].pred = point
+    def __iter__(self):
+        return Polygon2DIterator(self)
+
     
     def ray_crossing(self, xy):
         # Originate from:
         #       Joseph O'Rourke, Computational Geometry in C,2ed. Page 244, Code 7.13
         rcross = 0
         lcross = 0
-        n = self.vertex_xys.shape[0]
-        xys = self.vertex_xys
-        x = xy[0]
-        y = xy[1]
-        for i in xrange(n):
-            if np.alltrue(xys[i] == xy):
+        x,y=xy
+        for seg in self:
+            if np.alltrue(seg.head.coord == xy):
                 return 'v'
-            i1 = (i + n - 1) % n
-            
-            x_i, y_i = xys[i]
-            x_i1, y_i1 = xys[i1]
+            x_i, y_i = seg.head.coord
+            x_i1, y_i1 = seg.rear.coord
             rstrad = (y_i > y) != (y_i1 > y)
             lstrad = (y_i < y) != (y_i1 < y)
             
@@ -69,40 +119,25 @@ class Polygon2D(object):
         else:
             return 'o'
         
-    def distance_function(self, xy):
+    def distance_function(self, xy):       
         r_crs = self.ray_crossing(xy)
         if r_crs == 'e' or r_crs == 'v':
             return 0
-        inf_abs = self.distance_to_segment(0, xy)
-        for i in xrange(1, self.vertex_xys.shape[0]):
-            t = self.distance_to_segment(i, xy)
+        inf_abs = float('inf')
+        for seg in self:
+            t = seg.distance_to(xy)
             if t < inf_abs:
                 inf_abs = t
         return inf_abs if r_crs == 'i' else -inf_abs
         
-    def distance_to_segment(self, i, xy):
-        i2 = (i + 1) % self.vertex_xys.shape[0]
-        v1 = self.vertex_xys[i]
-        v2 = self.vertex_xys[i2]
-        v_e = v2 - v1
-        len_e = np.dot(v_e, v_e) ** 0.5
-        v_xy = xy - v1
-        nv_e = v_e / len_e
-        dt = np.dot(nv_e, v_xy)
-        if dt >= len_e:
-            return np.dot(dt, dt) ** 0.5
-        elif dt <= 0:
-            return np.dot(v_xy, v_xy) ** 0.5
-        else:
-            return abs(np.cross(v_e, v_xy))
-            
+   
 def sample_vertes_xys():
-    return np.array([[0, 0], [1, 0], [1, 1], [0.5, 0.5], [0, 1]], dtype=np.double)  
+    return np.array([[[0, 0], [1, 0], [1, 1], [0.5, 0.5], [0, 1]]], dtype=np.double)  
 
 if __name__ == '__main__':
 
-    pg_py = Polygon2D(sample_vertes_xys())
-    dist_func_py = np.frompyfunc(lambda x, y:pg_py.distance_function((x, y)), 2, 1)
+    pg = Polygon2D(sample_vertes_xys())
+    dist_func_py = np.frompyfunc(lambda x, y:pg.distance_function((x, y)), 2, 1)
     
     xs = np.linspace(-0.5, 1.5, 100)
     ys = np.linspace(-0.5, 1.5, 100)    
