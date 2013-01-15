@@ -6,42 +6,10 @@ Created on 2012-12-22
 @author: Sparrow HU <huhao200709@163.com>
 '''
 
-import numpy as np
-
-class Node(object):
-    def __init__(self, array=None):
-        if None is not array:
-            self.coord = np.array(array, dtype=np.double)
-        else:
-            self.coord = None
-        self.id = 0
-        
+from terse_proto.tsmf.model.segment import Segment2D
+import numpy as np       
             
-class Segment2D(object):
-    def __init__(self, point=None):
-        self.head = Node(point)
-        self.pred = None
-        self.succ = None
-    def r(self):
-        return self.succ.head
-    rear = property(r)
-    
-    def distance_to(self, xy):
-        v1 = self.head.coord
-        v2 = self.rear.coord
-        v_e = v2 - v1
-        len_e = np.dot(v_e, v_e) ** 0.5
-        v_xy = xy - v1
-        nv_e = v_e / len_e
-        dt = np.dot(nv_e, v_xy)
-        if dt >= len_e:
-            return np.dot(dt, dt) ** 0.5
-        elif dt <= 0:
-            return np.dot(v_xy, v_xy) ** 0.5
-        else:
-            return abs(np.cross(v_e, v_xy))
-            
-class Polygon2DIterator(object):
+class _Polygon2DIterator(object):
     def __init__(self, pg):
         self.pg = pg
         self.index = 0
@@ -84,7 +52,7 @@ class Polygon2D(object):
             point.succ = self.chains_heads[i]
             self.chains_heads[i].pred = point
     def __iter__(self):
-        return Polygon2DIterator(self)
+        return _Polygon2DIterator(self)
 
     
     def ray_crossing(self, xy):
