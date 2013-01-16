@@ -51,7 +51,7 @@ class MonomialBasis(object):
         self.base_order = base_order
         self.diff_order = 0
     
-    def size(self):
+    def basis_length(self):
         return bases_length(self.base_order)
     
     def values(self, xy):
