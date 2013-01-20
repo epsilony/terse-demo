@@ -25,8 +25,7 @@ col_ids[1::2] = nodesIds[3:] * 2 + 1
 nodes_size = 6
 lag_size = 4
 
-if __name__ == '__main__':
-# def gen_dirichlet_exps_codes():
+def gen_dirichlet_exps_codes():
     m = -Phi.dot(N.transpose())
     v = -N.dot(u)
     size = 2 * (nodes_size + lag_size)
@@ -44,6 +43,3 @@ if __name__ == '__main__':
     print gen_array_code(exp_v)
     print "End main vector exp----------------------------"
 
-# if __name__=="__main__":
-#    gen_dirichlet_exps_codes()
- 
