@@ -11,9 +11,9 @@ def plot_jpolygon(pg, ax, *args, **kwds):
     vertes = pg.getVertes()
     xys = []
     codes = []
-    for vs in vertes:
+    for act_vs in vertes:
         atBegin = True
-        for nd in vs:
+        for nd in act_vs:
             xys.append(nd.coord)
             if atBegin:
                 codes.append(Path.MOVETO)
