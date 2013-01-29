@@ -42,8 +42,8 @@ def plot_uvs(pp, ax, xs, ys, axis=None, is_vs=True):
     ax.plot(axis, exp_uvs, 'b', label='Precise') 
 
 if __name__ == '__main__':
-    WFProcessor2D = JClass('net.epsilony.tsmf.process.WFProcessor2D')
-    processor = WFProcessor2D.genTimoshenkoProjectProcess()
+    WeakformProcessor2D = JClass('net.epsilony.tsmf.process.WeakformProcessor2D')
+    processor = WeakformProcessor2D.genTimoshenkoProjectProcess()
     processor.process()
     processor.solve()
     pp = processor.postProcessor()
