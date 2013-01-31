@@ -22,7 +22,7 @@ def plot_uvs(pp, ax, xs, ys, axis=None, is_vs=True):
     act_uvs = []
     for i in xrange(len(xs)):
         xy = np.array((xs[i], ys[i]), dtype=np.double)
-        uv = pp.value(xy, None, None)
+        uv = pp.value(xy, None)
         if is_vs:
             act_uvs.append(uv[1])
         else:
