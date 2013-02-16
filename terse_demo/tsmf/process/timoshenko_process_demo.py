@@ -27,7 +27,7 @@ def plot_uvs(pp, ax, xs, ys, axis=None, is_vs=True):
             act_uvs.append(uv[1])
         else:
             act_uvs.append(uv[0])
-    timoBeam = processor.project.timoBeam
+    timoBeam = processor.weakformTask.timoBeam
     exp_uvs = []
     for i in xrange(len(xs)):
         xy = np.array((xs[i], ys[i]), dtype=np.double)
